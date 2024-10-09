@@ -1,6 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
 
+from core.logger import log
 from core.routers import health
 
 app = FastAPI()
@@ -13,4 +14,5 @@ async def hello():
 
 
 if __name__ == "__main__":
-    uvicorn.run("run:core", host="0.0.0.0", port=8000, reload=True)  # nosec
+    log.info("Hello!")
+    uvicorn.run("run:app", host="0.0.0.0", port=8000, reload=True)  # nosec
