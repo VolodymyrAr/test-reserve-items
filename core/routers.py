@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from .uow import get_uow, UnitOfWork
 
 health = APIRouter()
 
@@ -8,9 +9,9 @@ async def health_check_api():
     return {"status": "ok"}
 
 
-# @core.get("/health-check/db/")
-# async def health_check_db(db: AsyncSession = Depends(get_session)):
-#     result = await db.execute(sqlalchemy.text("SELECT 1"))
-#     if result.fetchall() == [(1,)]:
-#         return {"status": "ok"}
-#     return {"status": "error"}
+@health.get("/db")
+async def health_check_db(uow: UnitOfWork = Depends(get_uow)):
+    check_db = await uow.health_check()
+    if check_db:
+        return {"status": "ok"}
+    return {"status": "fail"}

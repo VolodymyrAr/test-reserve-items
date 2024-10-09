@@ -1,6 +1,8 @@
 import abc
 from abc import ABC
 
+import sqlalchemy
+
 from .db import AsyncLocalSession
 
 
@@ -35,10 +37,21 @@ class UnitOfWork(UnitOfWorkBase):
         self.db = AsyncLocalSession()
 
     async def commit(self):
-        self.db.commit()
+        await self.db.commit()
 
     async def rollback(self):
-        self.db.rollback()
+        await self.db.rollback()
 
     async def close(self):
-        self.db.close()
+        await self.db.close()
+
+    async def health_check(self):
+        result = await self.db.execute(sqlalchemy.text("SELECT 1"))
+        if result.fetchall() == [(1,)]:
+            return True
+        return False
+
+
+async def get_uow() -> UnitOfWork:
+    async with UnitOfWork() as uow:
+        yield uow

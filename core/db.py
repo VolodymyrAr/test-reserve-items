@@ -9,9 +9,9 @@ from sqlalchemy.ext.declarative import declarative_base, declared_attr
 
 from .settings import env
 
-async_engine = create_async_engine(
-    f"postgresql+asyncpg://{env.DB_USER}:{env.DB_PASSWORD}@{env.DB_HOST}:5432/{env.DB_NAME}",
-)
+db_url = f"postgresql+asyncpg://{env.DB_USER}:{env.DB_PASSWORD}@{env.DB_HOST}:5432/{env.DB_NAME}"
+print(db_url)
+async_engine = create_async_engine(db_url)
 
 AsyncLocalSession = async_sessionmaker(
     autocommit=False,
