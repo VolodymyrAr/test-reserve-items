@@ -5,7 +5,7 @@ from core.logger import log
 from core.routers import api
 
 app = FastAPI()
-app.include_router(api, prefix="/api", tags=["api"])
+app.include_router(api, prefix="/api")
 
 
 @app.get("/")

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from typing import Optional, Annotated, Tuple
+from typing import Optional, Annotated
 
 import jwt
 from fastapi import Depends, HTTPException, status
@@ -13,7 +13,7 @@ from core.users.model import User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
 
 
 def verify_password(plain_password, hashed_password):
@@ -43,7 +43,7 @@ class UserService(Service):
 
         password = hash_password(password)
         user = User(email=email, password=password, is_active=True)
-        self.uow.users.add(user)
+        await self.uow.users.add(user)
         return user
 
     async def authenticate(self, email: str, password: str) -> Optional[User]:
@@ -68,7 +68,7 @@ class UserService(Service):
 async def get_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     uow: UnitOfWork = Depends(get_uow),
-) -> Tuple[UnitOfWork, User]:
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -90,4 +90,4 @@ async def get_user(
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
 
-    return uow, user
+    return user

@@ -34,6 +34,10 @@ put in .env (root folder) DB_HOST=postgres
 
 `make lint` - run linters and formatters
 
-`make down` - shutdown containers
+`make stop` - shutdown containers
 
 `make logs` - see logs of web container
+
+`poetry run alembic revision --autogenerate -m "<message>"` - create migration
+
+`poetry run alembic upgrade head` - apply migration

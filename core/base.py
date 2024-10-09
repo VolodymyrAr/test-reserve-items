@@ -1,9 +1,11 @@
-from typing import TypeVar, Generic, Type, Optional
+import abc
+from abc import ABC
+from typing import Optional
+from typing import TypeVar, Generic, Type
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeMeta
-from uow import UnitOfWorkBase
 
 
 T = TypeVar("T", bound=DeclarativeMeta)
@@ -24,6 +26,36 @@ class Repository(Generic[T]):
         self.db.add(obj)
         await self.db.flush()
         return obj
+
+
+class UnitOfWorkBase(ABC):
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is None:
+            await self.commit()
+        else:
+            await self.rollback()
+        await self.close()
+
+    @abc.abstractmethod
+    async def commit(self):
+        pass
+
+    @abc.abstractmethod
+    async def rollback(self):
+        pass
+
+    @abc.abstractmethod
+    async def close(self):
+        pass
+
+    @property
+    @abc.abstractmethod
+    def users(self) -> Repository[T]:
+        pass
 
 
 class Service:

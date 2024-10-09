@@ -11,7 +11,7 @@ from core.users.schemas import UserResponse, UserCreate, Token
 users = APIRouter()
 
 
-@users.get("/register", response_model=UserResponse)
+@users.post("/register", response_model=UserResponse)
 async def register_user(req: UserCreate, uow: UnitOfWork = Depends(get_uow)):
     srv = UserService(uow)
     try:
@@ -21,7 +21,7 @@ async def register_user(req: UserCreate, uow: UnitOfWork = Depends(get_uow)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered") from e
 
 
-@users.post("/token")
+@users.post("/token", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     uow: UnitOfWork = Depends(get_uow),
