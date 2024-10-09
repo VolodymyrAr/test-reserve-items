@@ -1,17 +1,7 @@
-from fastapi import APIRouter, Depends
-from .uow import get_uow, UnitOfWork
+from fastapi import APIRouter
+from .health.routers import health
+from .users.routers import users
 
-health = APIRouter()
-
-
-@health.get("/web")
-async def health_check_api():
-    return {"status": "ok"}
-
-
-@health.get("/db")
-async def health_check_db(uow: UnitOfWork = Depends(get_uow)):
-    check_db = await uow.health_check()
-    if check_db:
-        return {"status": "ok"}
-    return {"status": "fail"}
+api = APIRouter()
+api.include_router(health, prefix="/health", tags=["health"])
+api.include_router(users, prefix="/users", tags=["users"])

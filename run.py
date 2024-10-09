@@ -2,10 +2,10 @@ import uvicorn
 from fastapi import FastAPI
 
 from core.logger import log
-from core.routers import health
+from core.routers import api
 
 app = FastAPI()
-app.include_router(health, prefix="/api/health", tags=["health"])
+app.include_router(api, prefix="/api", tags=["api"])
 
 
 @app.get("/")
