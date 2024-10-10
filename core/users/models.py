@@ -7,3 +7,4 @@ class User(Base):
     email = Column(String, unique=True, nullable=False, index=True)
     password = Column(String, nullable=False)
     is_active = Column(Boolean, nullable=False, default=False)
+    is_superuser = Column(Boolean, nullable=False, default=False)

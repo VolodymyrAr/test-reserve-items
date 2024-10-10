@@ -2,7 +2,7 @@ from typing import Optional
 
 from sqlalchemy import select
 
-from core.base import Repository
+from core.repositories import Repository
 from core.users.models import User
 
 

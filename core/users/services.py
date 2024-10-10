@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 
-from core.base import Service
+from core.services import Service
 from core.settings import env
 from core.uow import UnitOfWork, get_uow
 from core.users.models import User
@@ -91,3 +91,12 @@ async def get_user(
         raise HTTPException(status_code=400, detail="Inactive user")
 
     return user
+
+
+async def get_superuser(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    uow: UnitOfWork = Depends(get_uow),
+):
+    user = await get_user(token, uow)
+    if not user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
