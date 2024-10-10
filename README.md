@@ -30,7 +30,7 @@ put in .env (root folder) DB_HOST=postgres
 `pipx install pre-commit`
 `pre-commit install`
 
-## Commands
+### Commands
 
 `make lint` - run linters and formatters
 
@@ -41,3 +41,5 @@ put in .env (root folder) DB_HOST=postgres
 `poetry run alembic revision --autogenerate -m "<message>"` - create migration
 
 `poetry run alembic upgrade head` - apply migration
+
+`pytest` - run test

@@ -1,16 +1,16 @@
 from typing import Optional
 
-import sqlalchemy
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.base import UnitOfWorkBase
-from core.db import AsyncLocalSession
+from core.db import LocalSession
 from core.users.repositories import UserRepository
 
 
 class UnitOfWork(UnitOfWorkBase):
 
-    def __init__(self) -> None:
-        self.db = AsyncLocalSession()
+    def __init__(self, db: AsyncSession = None) -> None:
+        self.db = db or LocalSession()
 
         self._users: Optional[UserRepository] = None
 
@@ -22,12 +22,6 @@ class UnitOfWork(UnitOfWorkBase):
 
     async def close(self):
         await self.db.close()
-
-    async def health_check(self):
-        result = await self.db.execute(sqlalchemy.text("SELECT 1"))
-        if result.fetchall() == [(1,)]:
-            return True
-        return False
 
     @property
     def users(self) -> UserRepository:
