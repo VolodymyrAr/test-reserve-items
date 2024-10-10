@@ -15,14 +15,14 @@ class CategoryRepository(Repository[Category]):
 class ItemRepository(Repository[Item]):
     model = Item
 
-    async def add(self, item: Item) -> Item:  # pylint: disable=arguments-renamed
-        self.db.add(item)
+    async def add(self, obj: Item) -> Item:
+        self.db.add(obj)
         await self.db.flush()
-        await self.db.refresh(item, attribute_names=["category"])
-        return item
+        await self.db.refresh(obj, attribute_names=["category"])
+        return obj
 
-    async def get_by_id(self, item_id: int) -> Item:  # pylint: disable=arguments-renamed
-        q = select(Item).options(joinedload(Item.category)).where(Item.id == item_id)
+    async def get_by_id(self, obj_id: int) -> Item:
+        q = select(Item).options(joinedload(Item.category)).where(Item.id == obj_id)
         resp = await self.db.execute(q)
         return resp.scalar_one_or_none()
 
