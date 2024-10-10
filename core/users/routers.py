@@ -28,6 +28,7 @@ async def login_for_access_token(
 ) -> Token:
     srv = UserService(uow)
     user = await srv.authenticate(form_data.username, form_data.password)
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

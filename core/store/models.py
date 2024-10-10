@@ -2,23 +2,23 @@ from sqlalchemy import Column, String, Integer, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 
 from core.db import Base
-from core.orders.enums import OrderStatus
+from core.store.enums import OrderStatus
 
 
 class Category(Base):
     name = Column(String(255))
     parent_id = Column(Integer, ForeignKey("category.id"))
 
-    children = relationship("Category", backref="parent", remote_side="category.id")
+    children = relationship("Category", backref="parent", remote_side="Category.id")
 
 
 class Item(Base):
     name = Column(String(255))
-    price = Column(String(255))
+    price = Column(Integer)
     category_id = Column(Integer, ForeignKey("category.id"))
     stock = Column(Integer, default=0, index=True)
 
-    category = relationship("Category", backref="orders")
+    category = relationship("Category", backref="store")
 
 
 class Order(Base):
@@ -30,7 +30,7 @@ class OrderItem(Base):
     item_id = Column(Integer, ForeignKey("item.id"), nullable=False)
     quantity = Column(Integer, nullable=False, index=True)
 
-    order = relationship("Order", backref="orders")
+    order = relationship("Order", backref="store")
 
 
 class Discount(Base):

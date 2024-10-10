@@ -16,16 +16,17 @@ class Repository(Generic[T]):
         self.db = db
 
     async def get_by_id(self, obj_id: int) -> Optional[T]:
-        q = select(self.model).where(id=obj_id)
+        q = select(self.model).where(self.model.id == obj_id)
         res = await self.db.execute(q)
         return res.scalar_one_or_none()
 
     async def add(self, obj: T) -> T:
         self.db.add(obj)
         await self.db.flush()
+        await self.db.refresh(obj)
         return obj
 
-    async def get_all(self, query_filter: BaseModel) -> List[T]:  # pylint: disable=unused-argument
+    async def get_all(self, query_filter: BaseModel = None) -> List[T]:  # pylint: disable=unused-argument
         q = select(self.model)
         res = await self.db.execute(q)
         return res.scalars().all()

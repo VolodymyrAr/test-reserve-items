@@ -42,4 +42,6 @@ put in .env (root folder) DB_HOST=postgres
 
 `poetry run alembic upgrade head` - apply migration
 
+`poetry run alembic downgrade -1` - downgrade last migration
+
 `pytest` - run test

@@ -5,7 +5,7 @@ from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db import LocalSession
-from core.orders.repositories import ItemRepository, CategoryRepository
+from core.store.repositories import ItemRepository, CategoryRepository
 from core.users.repositories import UserRepository
 
 

@@ -1,4 +1,4 @@
-"""add orders models, add is_superuser for user model
+"""add store models, add is_superuser for user model
 
 Revision ID: 4e22b4b97719
 Revises: 615d51be09d5
@@ -65,7 +65,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_order_item_id'), 'order_item', ['id'], unique=False)
     op.create_index(op.f('ix_order_item_quantity'), 'order_item', ['quantity'], unique=False)
-    op.add_column('user', sa.Column('is_superuser', sa.Boolean(), nullable=False))
+    op.add_column('user', sa.Column('is_superuser', sa.Boolean(), nullable=False, server_default='false'))
     # ### end Alembic commands ###
 
 

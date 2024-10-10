@@ -11,6 +11,7 @@ from core.settings import env
 from core.uow import UnitOfWork, get_uow
 from core.users.models import User
 
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
@@ -43,8 +44,7 @@ class UserService(Service):
 
         password = hash_password(password)
         user = User(email=email, password=password, is_active=True)
-        await self.uow.users.add(user)
-        return user
+        return await self.uow.users.add(user)
 
     async def authenticate(self, email: str, password: str) -> Optional[User]:
         user = await self.uow.users.get_by_email(email)

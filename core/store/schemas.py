@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from pydantic import BaseModel
 
 from core.schemas import Pagination
@@ -5,13 +7,19 @@ from core.schemas import Pagination
 
 class ItemListFilter(Pagination):
     only_available: bool = True
+    category_id: Optional[int] = None
 
 
 class ItemCreate(BaseModel):
     name: str
     price: int
-    category_id: str
+    category_id: int
     stock: int = 0
+
+
+class ItemUpdate(BaseModel):
+    price: Optional[int] = None
+    stock: Optional[int] = None
 
 
 class ItemCategoryResponse(BaseModel):
@@ -29,10 +37,13 @@ class ItemResponse(BaseModel):
 
 class CategoryCreate(BaseModel):
     name: str
-    parent_id: int
+    parent_id: int = None
 
 
 class CategoryResponse(BaseModel):
     id: int
     name: str
-    children: list["CategoryResponse"]
+
+
+class CategoryTreeResponse(CategoryResponse):
+    children: List["CategoryTreeResponse"] = []
