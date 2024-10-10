@@ -4,7 +4,7 @@ import sqlalchemy
 
 from core.base import UnitOfWorkBase
 from core.db import AsyncLocalSession
-from core.users.repository import UserRepository
+from core.users.repositories import UserRepository
 
 
 class UnitOfWork(UnitOfWorkBase):

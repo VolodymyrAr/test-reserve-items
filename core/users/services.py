@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from core.base import Service
 from core.settings import env
 from core.uow import UnitOfWork, get_uow
-from core.users.model import User
+from core.users.models import User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

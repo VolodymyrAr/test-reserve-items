@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy import select
 
 from core.base import Repository
-from core.users.model import User
+from core.users.models import User
 
 
 class UserRepository(Repository[User]):

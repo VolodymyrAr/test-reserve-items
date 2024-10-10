@@ -3,8 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
-from core.users.model import User
-from core.users.service import UserService, EmailAlreadyExists, get_user
+from core.users.models import User
+from core.users.services import UserService, EmailAlreadyExists, get_user
 from core.uow import UnitOfWork, get_uow
 from core.users.schemas import UserResponse, UserCreate, Token
 
