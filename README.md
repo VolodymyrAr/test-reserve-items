@@ -41,7 +41,7 @@ put in .env (root folder) DB_HOST=postgres
 
 `make logs` - see logs of web container
 
-`make migration -m <message>` - create migration
+`make migration m=<message>` - create migration
 
 `make migrate` - apply migration
 

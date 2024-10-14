@@ -3,11 +3,11 @@ from typing import List
 
 from fastapi import APIRouter, Depends
 
+from core.schemas import Pagination
+from core.store.entities import Category
 from core.store.schemas import (
     ItemListFilter,
     CategoryCreate,
-    CategoryResponse,
-    CategoryTreeResponse,
     ItemResponse,
     ItemCreate,
     ItemUpdate,
@@ -20,15 +20,16 @@ from core.users.services import get_user, get_superuser
 router = APIRouter()
 
 
-@router.get("/categories", response_model=List[CategoryTreeResponse])
-async def get_categories_list(user: UserModel = Depends(get_user), uow: UnitOfWork = Depends(get_uow)):
+@router.get("/categories", response_model=List[Category])
+async def get_categories_list(
+    query: Pagination = Depends(), user: UserModel = Depends(get_user), uow: UnitOfWork = Depends(get_uow)
+):
     srv = CategoryService(uow)
-    categories = await srv.get_list()
-    category_tree = await srv.build_category_tree(categories)
-    return category_tree
+    categories = await srv.get_list(query)
+    return categories
 
 
-@router.post("/categories", response_model=CategoryResponse)
+@router.post("/categories", response_model=Category)
 async def create_category(
     req: CategoryCreate,
     user: UserModel = Depends(get_superuser),

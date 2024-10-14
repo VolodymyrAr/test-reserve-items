@@ -4,25 +4,14 @@ from typing import Optional, Annotated
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from passlib.context import CryptContext
 
 from core.services import Service
 from core.settings import env
+from core.store.utils import hash_password
 from core.uow import UnitOfWork, get_uow
-from core.users.entities import UserEntity
-
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from core.users.entities import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
-
-
-def verify_password(plain_password, hashed_password) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def hash_password(password) -> str:
-    return pwd_context.hash(password)
 
 
 class EmailAlreadyExists(Exception):
@@ -37,7 +26,7 @@ class UserService(Service):
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
     ALGORITHM = "HS256"
 
-    async def register(self, email: str, password: str) -> UserEntity:
+    async def register(self, email: str, password: str) -> User:
         user = await self.uow.users.get_by_email(email)
         if user:
             raise EmailAlreadyExists
@@ -46,15 +35,11 @@ class UserService(Service):
         user = await self.uow.users.create(email=email, hashed_password=password)
         return user
 
-    async def authenticate(self, email: str, password: str) -> Optional[UserEntity]:
-        user = await self.uow.users.get_by_email(email)
-        if not user:
-            return
-        if not verify_password(password, user.password):
-            return
+    async def authenticate(self, email: str, password: str) -> Optional[User]:
+        user = await self.uow.users.get_by_creds(email, password)
         return user
 
-    def create_access_token(self, user: UserEntity) -> str:
+    def create_access_token(self, user: User) -> str:
         data = {"sub": user.email}
         to_encode = data.copy()
 
@@ -68,7 +53,7 @@ class UserService(Service):
 async def get_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     uow: UnitOfWork = Depends(get_uow),
-) -> UserEntity:
+) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -96,7 +81,7 @@ async def get_user(
 async def get_superuser(
     token: Annotated[str, Depends(oauth2_scheme)],
     uow: UnitOfWork = Depends(get_uow),
-) -> UserEntity:
+) -> User:
     user = await get_user(token, uow)
     if not user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)

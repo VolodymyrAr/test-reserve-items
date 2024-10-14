@@ -1,9 +1,11 @@
 from typing import List
 
 from core.exceptions import ObjNotFoundError
+from core.schemas import Pagination
 from core.services import Service
-from core.store.models import Item, Category
-from core.store.schemas import ItemListFilter, CategoryCreate, CategoryTreeResponse, ItemCreate, ItemUpdate
+from core.store.entities import Item, Category
+from core.store.models import ItemModel
+from core.store.schemas import ItemListFilter, CategoryCreate, ItemCreate, ItemUpdate
 
 
 class CategoryNotFound(ObjNotFoundError):
@@ -16,29 +18,13 @@ class ItemNotFound(ObjNotFoundError):
 
 class CategoryService(Service):
 
-    async def create(self, category_data: CategoryCreate) -> Category:
-        category = Category(
-            name=category_data.name,
-            parent_id=category_data.parent_id,
-        )
-        await self.uow.categories.add(category)
+    async def create(self, data: CategoryCreate) -> Category:
+        category = await self.uow.categories.create(data)
         return category
 
-    async def get_list(self) -> List[Category]:
-        categories = await self.uow.categories.get_all()
+    async def get_list(self, list_filter: Pagination) -> List[Category]:
+        categories = await self.uow.categories.get_all(list_filter)
         return categories
-
-    async def build_category_tree(
-        self,
-        categories: List[Category] = None,
-        parent_id: int = None,
-    ) -> List[CategoryTreeResponse]:
-        tree = []
-        for category in categories:
-            if category.parent_id == parent_id:
-                children = await self.build_category_tree(categories, category.id)
-                tree.append(CategoryTreeResponse(id=category.id, name=category.name, children=children))
-        return tree
 
 
 class ItemService(Service):
@@ -47,12 +33,12 @@ class ItemService(Service):
         items = await self.uow.items.get_all(list_filter)
         return items
 
-    async def create(self, item_data: ItemCreate) -> Item:
+    async def create(self, item_data: ItemCreate) -> ItemModel:
         category = await self.uow.categories.get_by_id(item_data.category_id)
         if not category:
             raise CategoryNotFound(f"Category id:{item_data.category_id} not found")
 
-        item = Item(
+        item = ItemModel(
             name=item_data.name,
             price=item_data.price,
             category_id=item_data.category_id,
@@ -60,7 +46,7 @@ class ItemService(Service):
         )
         return await self.uow.items.add(item)
 
-    async def update(self, item_id: int, item_data: ItemUpdate) -> Item:
+    async def update(self, item_id: int, item_data: ItemUpdate) -> ItemModel:
         item = await self.uow.items.get_by_id(item_id)
         if not item:
             raise ItemNotFound(f"Item id:{item_id} not found")
