@@ -3,15 +3,15 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
-from core.users.models import User
+from core.users.entities import UserEntity
 from core.users.services import UserService, EmailAlreadyExists, get_user
 from core.uow import UnitOfWork, get_uow
-from core.users.schemas import UserResponse, UserCreate, Token
+from core.users.schemas import UserCreate, Token
 
 users = APIRouter()
 
 
-@users.post("/register", response_model=UserResponse)
+@users.post("/register", response_model=UserEntity)
 async def register_user(req: UserCreate, uow: UnitOfWork = Depends(get_uow)):
     srv = UserService(uow)
     try:
@@ -39,8 +39,8 @@ async def login_for_access_token(
     return Token(access_token=access_token, token_type="bearer")  # nosec
 
 
-@users.get("/me", response_model=UserResponse)
+@users.get("/me", response_model=UserEntity)
 async def read_users_me(
-    user: Annotated[User, Depends(get_user)],
+    user: Annotated[UserEntity, Depends(get_user)],
 ):
     return user

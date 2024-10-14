@@ -27,7 +27,13 @@ class Base:
 
     @declared_attr
     def __tablename__(cls):  # pylint: disable=no-self-argument
-        return to_snake(cls.__name__)  # pylint: disable=no-member
+        name = cls.__name__.replace("Model", "")  # pylint: disable=no-member
+        return to_snake(name)
 
 
 Base = declarative_base(cls=Base)
+
+
+async def get_db() -> AsyncSession:
+    async with LocalSession() as db:
+        yield db

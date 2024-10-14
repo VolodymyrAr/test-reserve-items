@@ -8,12 +8,11 @@ from core.store.models import Item, Category
 from core.store.schemas import ItemListFilter
 
 
-class CategoryRepository(Repository[Category]):
-    model = Category
+class CategoryRepository(Repository):
+    pass
 
 
-class ItemRepository(Repository[Item]):
-    model = Item
+class ItemRepository(Repository):
 
     async def add(self, obj: Item) -> Item:
         self.db.add(obj)

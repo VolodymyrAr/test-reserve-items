@@ -14,14 +14,14 @@ from core.store.schemas import (
 )
 from core.store.services import CategoryService, ItemService
 from core.uow import UnitOfWork, get_uow
-from core.users.models import User
+from core.users.models import UserModel
 from core.users.services import get_user, get_superuser
 
 router = APIRouter()
 
 
 @router.get("/categories", response_model=List[CategoryTreeResponse])
-async def get_categories_list(user: User = Depends(get_user), uow: UnitOfWork = Depends(get_uow)):
+async def get_categories_list(user: UserModel = Depends(get_user), uow: UnitOfWork = Depends(get_uow)):
     srv = CategoryService(uow)
     categories = await srv.get_list()
     category_tree = await srv.build_category_tree(categories)
@@ -29,7 +29,11 @@ async def get_categories_list(user: User = Depends(get_user), uow: UnitOfWork = 
 
 
 @router.post("/categories", response_model=CategoryResponse)
-async def create_category(req: CategoryCreate, user: User = Depends(get_superuser), uow: UnitOfWork = Depends(get_uow)):
+async def create_category(
+    req: CategoryCreate,
+    user: UserModel = Depends(get_superuser),
+    uow: UnitOfWork = Depends(get_uow),
+):
     srv = CategoryService(uow)
     return await srv.create(req)
 
@@ -37,7 +41,7 @@ async def create_category(req: CategoryCreate, user: User = Depends(get_superuse
 @router.get("/items", response_model=List[ItemResponse])
 async def items_list(
     query: ItemListFilter = Depends(),
-    user: User = Depends(get_user),
+    user: UserModel = Depends(get_user),
     uow: UnitOfWork = Depends(get_uow),
 ):
     srv = ItemService(uow)
@@ -48,7 +52,7 @@ async def items_list(
 @router.post("/items", response_model=ItemResponse)
 async def create_item(
     req: ItemCreate,
-    user: User = Depends(get_superuser),
+    user: UserModel = Depends(get_superuser),
     uow: UnitOfWork = Depends(get_uow),
 ):
     srv = ItemService(uow)
@@ -59,7 +63,7 @@ async def create_item(
 async def update_item(
     item_id: int,
     req: ItemUpdate,
-    user: User = Depends(get_user),
+    user: UserModel = Depends(get_user),
     uow: UnitOfWork = Depends(get_uow),
 ):
     srv = ItemService(uow)
@@ -69,7 +73,7 @@ async def update_item(
 
 @router.get("/report")
 async def sell_report(
-    user: User = Depends(get_superuser),
+    user: UserModel = Depends(get_superuser),
 ):
     raise NotImplementedError
 

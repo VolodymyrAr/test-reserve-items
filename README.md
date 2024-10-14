@@ -12,7 +12,7 @@ Note! all docker-compose command using v2 with space instead of hyphen
 
 ### Local
 
-`docker compose up -d postgres`  - run local database
+`make db`  - run database in docker for local development
 
 put in .env (root folder) DB_HOST=localhost
 
@@ -23,25 +23,32 @@ put in .env (root folder) DB_HOST=localhost
 
 put in .env (root folder) DB_HOST=postgres
 
-`make run` - run app in docker'
+`make start` - run app in docker'
 
 ## Development
 
+#### Install pre-commit
 `pipx install pre-commit`
+
 `pre-commit install`
 
 ### Commands
 
+#### make commands
 `make lint` - run linters and formatters
 
 `make stop` - shutdown containers
 
 `make logs` - see logs of web container
 
-`poetry run alembic revision --autogenerate -m "<message>"` - create migration
+`make migration -m <message>` - create migration
 
-`poetry run alembic upgrade head` - apply migration
-
-`poetry run alembic downgrade -1` - downgrade last migration
+`make migrate` - apply migration
 
 `pytest` - run test
+
+see all actual short commands in Makefile
+
+#### other commands
+
+`poetry run alembic downgrade -1` - downgrade last migration

@@ -32,10 +32,10 @@ repos:
     -   id: sort-simple-yaml  #sorts simple yaml files which consist only of top-level keys, preserving comments and blocks.
     -   id: trailing-whitespace  #trims trailing whitespace.
 
--   repo: https://github.com/asottile/add-trailing-comma
-    rev: v3.1.0
-    hooks:
-    -   id: add-trailing-comma
+#-   repo: https://github.com/asottile/add-trailing-comma
+#    rev: v3.1.0
+#    hooks:
+#    -   id: add-trailing-comma
 
 #-   repo: https://github.com/asottile/yesqa
 #    rev: v1.5.0

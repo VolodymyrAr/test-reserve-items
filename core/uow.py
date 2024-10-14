@@ -2,16 +2,17 @@ import abc
 from abc import ABC
 from typing import Optional
 
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.db import LocalSession
+from core.db import get_db
 from core.store.repositories import ItemRepository, CategoryRepository
 from core.users.repositories import UserRepository
 
 
 class UnitOfWorkBase(ABC):
 
-    async def __aenter__(self):
+    async def __aenter__(self, commit=True):
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -19,7 +20,6 @@ class UnitOfWorkBase(ABC):
             await self.commit()
         else:
             await self.rollback()
-        await self.close()
 
     @abc.abstractmethod
     async def commit(self):
@@ -27,10 +27,6 @@ class UnitOfWorkBase(ABC):
 
     @abc.abstractmethod
     async def rollback(self):
-        pass
-
-    @abc.abstractmethod
-    async def close(self):
         pass
 
     @property
@@ -51,8 +47,8 @@ class UnitOfWorkBase(ABC):
 
 class UnitOfWork(UnitOfWorkBase):
 
-    def __init__(self, db: AsyncSession = None) -> None:
-        self.db = db or LocalSession()
+    def __init__(self, db: AsyncSession) -> None:
+        self.db = db
 
         self._users: Optional[UserRepository] = None
 
@@ -64,9 +60,6 @@ class UnitOfWork(UnitOfWorkBase):
 
     async def rollback(self):
         await self.db.rollback()
-
-    async def close(self):
-        await self.db.close()
 
     @property
     def users(self) -> UserRepository:
@@ -84,6 +77,6 @@ class UnitOfWork(UnitOfWorkBase):
         return self._categories
 
 
-async def get_uow() -> UnitOfWork:
-    async with UnitOfWork() as uow:
+async def get_uow(db: AsyncSession = Depends(get_db)) -> UnitOfWork:
+    async with UnitOfWork(db) as uow:
         yield uow

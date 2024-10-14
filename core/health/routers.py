@@ -1,8 +1,9 @@
 import enum
 import sqlalchemy
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.db import LocalSession
+from core.db import get_db
 
 health = APIRouter()
 
@@ -18,11 +19,9 @@ async def health_check_api():
 
 
 @health.get("/db")
-async def health_check_db():
-    db = LocalSession()
+async def health_check_db(db: AsyncSession = Depends(get_db)):
     result = await db.execute(sqlalchemy.text("SELECT 1"))
     result = result.fetchall()
-    await db.close()
     if result == [(1,)]:
         return {"status": Status.SUCCESS.value}
     return {"status": Status.FAILED.value}
