@@ -4,8 +4,8 @@ from sqlalchemy import and_, select
 from sqlalchemy.orm import aliased
 
 from core.queries import Query
-from core.store.models import Category, Item, Discount
-from core.store.schemas import ItemResponse, ItemListFilter, CategoryResponse, CategoryBase, DiscountBase
+from core.store.models import Category, Item, Discount, Order
+from core.store.schemas import ItemResponse, ItemListFilter, CategoryResponse, CategoryBase, DiscountBase, OrderFilter
 
 
 class ItemQuery(Query):
@@ -55,6 +55,7 @@ class ItemQuery(Query):
                 id=i.id,
                 price=i.price,
                 stock=i.stock,
+                name=str(i.name),
                 category=CategoryBase(
                     id=i.category_id,
                     name=i.category.name,
@@ -97,4 +98,22 @@ class DiscountQuery(Query):
 
     async def discounts(self) -> List[Discount]:
         q = select(Discount)
+        return await self._execute_all(q)
+
+
+class OrderQuery(Query):
+
+    async def orders(self, list_filter: OrderFilter) -> List[Order]:
+        q = select(Order).outerjoin(Item)
+
+        where_conditions = []
+        if list_filter.item_id:
+            where_conditions.append(Order.item_id == list_filter.item_id)
+        if list_filter.category_id:
+            where_conditions.append(Item.category_id == list_filter.category_id)
+        if list_filter.status:
+            where_conditions.append(Order.status == list_filter.status)
+
+        q = q.where(*where_conditions).limit(list_filter.limit).offset(list_filter.offset)
+
         return await self._execute_all(q)

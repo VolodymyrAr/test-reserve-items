@@ -3,10 +3,17 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from core.schemas import Pagination
+from core.store.enums import OrderStatus
 
 
 class ItemListFilter(Pagination):
     only_available: bool = True
+    category_id: Optional[int] = None
+
+
+class OrderFilter(Pagination):
+    status: OrderStatus = OrderStatus.RESERVED
+    item_id: Optional[int] = None
     category_id: Optional[int] = None
 
 
@@ -54,6 +61,21 @@ class CategoryResponse(CategoryBase):
 class ItemResponse(BaseModel):
     id: int
     price: int
+    name: str
     discount: Optional[DiscountBase] = None
     category: CategoryBase
     stock: int
+
+
+class OrderResponse(BaseModel):
+    id: int
+    item_id: Optional[int] = None
+    status: OrderStatus
+    name: str
+    price: int
+    discount: Optional[int] = None
+    quantity: int
+
+
+class OrderCreate(BaseModel):
+    quantity: int

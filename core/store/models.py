@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, ForeignKey, Enum, func, DateTime, Boolean
+from sqlalchemy import Column, String, Integer, ForeignKey, Enum, Boolean
 from sqlalchemy.orm import relationship
 
 from core.db import Base
@@ -13,32 +13,23 @@ class Category(Base):
 class Item(Base):
     name = Column(String(255))
     price = Column(Integer)
-    category_id = Column(Integer, ForeignKey("category.id"))
+    category_id = Column(Integer, ForeignKey("category.id"), nullable=False)
     stock = Column(Integer, default=0, index=True)
 
-    category = relationship("Category", backref="store", lazy="joined")
+    category = relationship("Category", backref="items", lazy="joined")
 
 
 class Order(Base):
     status = Column(Enum(OrderStatus), nullable=False)
+    item_id = Column(Integer, ForeignKey("item.id", ondelete="SET NULL"))
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    created_at = Column(DateTime, server_default=func.now(), nullable=False)
-    reserved_at = Column(DateTime, nullable=True)
-    confirmed_at = Column(DateTime, nullable=True)
-
-    user = relationship("User", backref="orders", lazy="joined")
-
-
-class OrderItem(Base):
-    order_id = Column(Integer, ForeignKey("order.id"), nullable=False)
-    item_id = Column(Integer, ForeignKey("item.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
+    name = Column(String(255), nullable=False)
     quantity = Column(Integer, nullable=False, index=True)
     price = Column(Integer, nullable=False)
-    discount = Column(Integer, nullable=False)
+    discount = Column(Integer, nullable=True)
 
-    order = relationship("Order", backref="order_items", lazy="joined")
-    item = relationship("Item", backref="order_items", lazy="joined")
+    user = relationship("User", backref="orders", lazy="joined")
+    item = relationship("Item", backref="orders", lazy="joined")
 
 
 class Discount(Base):

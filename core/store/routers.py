@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db import get_db
 from core.schemas import Pagination, ID, Action
-from core.store.queries import CategoryQuery, DiscountQuery, ItemQuery
+from core.store.queries import CategoryQuery, DiscountQuery, ItemQuery, OrderQuery
 from core.store.schemas import (
     ItemListFilter,
     CategoryCreate,
@@ -16,11 +16,14 @@ from core.store.schemas import (
     DiscountResponse,
     DiscountCreate,
     ItemResponse,
+    OrderResponse,
+    OrderCreate,
+    OrderFilter,
 )
-from core.store.services import CategoryService, ItemService, DiscountService
+from core.store.services import CategoryService, ItemService, DiscountService, OrderService
 from core.uow import UnitOfWork, get_uow
 from core.users.models import User
-from core.users.services import get_superuser
+from core.users.services import get_superuser, get_user
 
 router = APIRouter()
 
@@ -103,7 +106,61 @@ async def update_item(
 ):
     srv = ItemService(uow)
     await srv.update(item_id, req)
-    return
+    return Action(message="Item updated")
+
+
+@router.delete("/items/{item_id}")
+async def delete_item(
+    item_id: int,
+    user: User = Depends(get_superuser),
+    uow: UnitOfWork = Depends(get_uow),
+):
+    srv = ItemService(uow)
+    await srv.delete(item_id)
+    return Action(message="Item deleted")
+
+
+@router.get("/orders", response_model=List[OrderResponse])
+async def list_order(
+    query: OrderFilter = Depends(), user: User = Depends(get_superuser), db: AsyncSession = Depends(get_db)
+):
+    return await OrderQuery(db).orders(list_filter=query)
+
+
+@router.post("/items/{item_id}/reserve", response_model=ID)
+async def reserve(
+    item_id: int,
+    req: OrderCreate,
+    user: User = Depends(get_user),
+    uow: UnitOfWork = Depends(get_uow),
+):
+    """Create order for item with status reserved"""
+    srv = OrderService(uow)
+    return await srv.reserve_item(item_id, req.quantity, user.id)
+
+
+@router.post("/orders/{order_id}/cancel", response_model=Action)
+async def cancel_reserve(
+    order_id: int,
+    user: User = Depends(get_user),
+    uow: UnitOfWork = Depends(get_uow),
+):
+    """Create order for item with status reserved"""
+    srv = OrderService(uow)
+    await srv.cancel_order(order_id)
+    return Action(message="Order cancelled")
+
+
+@router.post("/orders/{order_id}/confirm", response_model=Action)
+async def confirm_reserve(
+    order_id: int,
+    user: User = Depends(get_user),
+    uow: UnitOfWork = Depends(get_uow),
+):
+    """Create order for item with status reserved"""
+    srv = OrderService(uow)
+    await srv.confirm_order(order_id)
+    return Action(message="Order confirmed")
 
 
 store = router

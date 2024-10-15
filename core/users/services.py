@@ -42,7 +42,8 @@ class UserService(Service):
             raise EmailAlreadyExists
 
         password = hash_password(password)
-        user = await self.uow.users.create(email=email, hashed_password=password)
+        user = User(email=email, password=password)
+        user = await self.uow.users.add(user)
         return user
 
     async def authenticate(self, email: str, password: str) -> Optional[User]:

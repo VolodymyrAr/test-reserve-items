@@ -10,7 +10,6 @@ from core.store.repositories import (
     ItemRepository,
     CategoryRepository,
     DiscountRepository,
-    OrderItemRepository,
     OrderRepository,
 )
 from core.users.repositories import UserRepository
@@ -57,11 +56,6 @@ class UnitOfWorkBase(ABC):
 
     @property
     @abc.abstractmethod
-    def order_items(self) -> OrderItemRepository:
-        pass
-
-    @property
-    @abc.abstractmethod
     def orders(self) -> OrderRepository:
         pass
 
@@ -76,7 +70,6 @@ class UnitOfWork(UnitOfWorkBase):
         self._items: Optional[ItemRepository] = None
         self._categories: Optional[CategoryRepository] = None
         self._discounts: Optional[DiscountRepository] = None
-        self._order_items: Optional[OrderItemRepository] = None
         self._orders: Optional[OrderRepository] = None
 
     async def commit(self):
@@ -104,11 +97,6 @@ class UnitOfWork(UnitOfWorkBase):
     def discounts(self) -> DiscountRepository:
         self._discounts = self._discounts or DiscountRepository(self.db)
         return self._discounts
-
-    @property
-    def order_items(self) -> OrderItemRepository:
-        self._order_items = self._order_items or OrderItemRepository(self.db)
-        return self._order_items
 
     @property
     def orders(self) -> OrderRepository:

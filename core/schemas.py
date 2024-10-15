@@ -11,5 +11,8 @@ class ID(BaseModel):
 
 
 class Action(BaseModel):
-    success: bool = True
     message: str
+
+
+class Error(BaseModel):
+    detail: str
