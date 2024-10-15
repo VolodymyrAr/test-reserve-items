@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     DB_USER: str = "postgres"
     DB_PASSWORD: str = "postgres"
     DB_HOST: str = "postgres"
-
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     model_config = SettingsConfigDict(env_file=".env")
 
 

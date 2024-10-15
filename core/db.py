@@ -27,8 +27,7 @@ class Base:
 
     @declared_attr
     def __tablename__(cls):  # pylint: disable=no-self-argument
-        name = cls.__name__.replace("Model", "")  # pylint: disable=no-member
-        return to_snake(name)
+        return to_snake(cls.__name__)  # pylint: disable=no-member
 
 
 Base = declarative_base(cls=Base)

@@ -6,7 +6,13 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.db import get_db
-from core.store.repositories import ItemRepository, CategoryRepository
+from core.store.repositories import (
+    ItemRepository,
+    CategoryRepository,
+    DiscountRepository,
+    OrderItemRepository,
+    OrderRepository,
+)
 from core.users.repositories import UserRepository
 
 
@@ -44,6 +50,21 @@ class UnitOfWorkBase(ABC):
     def categories(self) -> CategoryRepository:
         pass
 
+    @property
+    @abc.abstractmethod
+    def discounts(self) -> DiscountRepository:
+        pass
+
+    @property
+    @abc.abstractmethod
+    def order_items(self) -> OrderItemRepository:
+        pass
+
+    @property
+    @abc.abstractmethod
+    def orders(self) -> OrderRepository:
+        pass
+
 
 class UnitOfWork(UnitOfWorkBase):
 
@@ -54,6 +75,9 @@ class UnitOfWork(UnitOfWorkBase):
 
         self._items: Optional[ItemRepository] = None
         self._categories: Optional[CategoryRepository] = None
+        self._discounts: Optional[DiscountRepository] = None
+        self._order_items: Optional[OrderItemRepository] = None
+        self._orders: Optional[OrderRepository] = None
 
     async def commit(self):
         await self.db.commit()
@@ -75,6 +99,21 @@ class UnitOfWork(UnitOfWorkBase):
     def categories(self) -> CategoryRepository:
         self._categories = self._categories or CategoryRepository(self.db)
         return self._categories
+
+    @property
+    def discounts(self) -> DiscountRepository:
+        self._discounts = self._discounts or DiscountRepository(self.db)
+        return self._discounts
+
+    @property
+    def order_items(self) -> OrderItemRepository:
+        self._order_items = self._order_items or OrderItemRepository(self.db)
+        return self._order_items
+
+    @property
+    def orders(self) -> OrderRepository:
+        self._orders = self._orders or OrderRepository(self.db)
+        return self._orders
 
 
 async def get_uow(db: AsyncSession = Depends(get_db)) -> UnitOfWork:

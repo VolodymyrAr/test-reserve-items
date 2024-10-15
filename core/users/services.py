@@ -1,17 +1,27 @@
-from datetime import datetime, timedelta, timezone
 from typing import Optional, Annotated
 
 import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from passlib.context import CryptContext
 
 from core.services import Service
 from core.settings import env
-from core.store.utils import hash_password
 from core.uow import UnitOfWork, get_uow
-from core.users.entities import User
+from core.users.models import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def verify_password(plain_password, hashed_password) -> bool:
+    return pwd_context.verify(plain_password, hashed_password)
+
+
+def hash_password(password) -> str:
+    return pwd_context.hash(password)
 
 
 class EmailAlreadyExists(Exception):
@@ -36,18 +46,12 @@ class UserService(Service):
         return user
 
     async def authenticate(self, email: str, password: str) -> Optional[User]:
-        user = await self.uow.users.get_by_creds(email, password)
+        user = await self.uow.users.get_by_email(email)
+        if not user:
+            return
+        if not verify_password(password, user.password):
+            return
         return user
-
-    def create_access_token(self, user: User) -> str:
-        data = {"sub": user.email}
-        to_encode = data.copy()
-
-        expire = datetime.now(timezone.utc) + timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
-
-        to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, env.SECRET_KEY, algorithm=self.ALGORITHM)
-        return encoded_jwt
 
 
 async def get_user(

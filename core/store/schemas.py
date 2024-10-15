@@ -10,6 +10,26 @@ class ItemListFilter(Pagination):
     category_id: Optional[int] = None
 
 
+class CategoryBase(BaseModel):
+    id: int
+    name: str
+
+
+class DiscountCreate(BaseModel):
+    category_id: int
+    value: int
+
+
+class DiscountBase(BaseModel):
+    id: int
+    value: int
+
+
+class DiscountResponse(DiscountBase):
+    is_active: bool
+    category: CategoryBase
+
+
 class ItemCreate(BaseModel):
     name: str
     price: int
@@ -22,28 +42,18 @@ class ItemUpdate(BaseModel):
     stock: Optional[int] = None
 
 
-class ItemCategoryResponse(BaseModel):
-    id: int
-    name: str
-
-
-class ItemResponse(BaseModel):
-    id: int
-    name: str
-    price: int
-    stock: int
-    category: ItemCategoryResponse
-
-
 class CategoryCreate(BaseModel):
     name: str
     parent_id: int = None
 
 
-class CategoryResponse(BaseModel):
+class CategoryResponse(CategoryBase):
+    children: List["CategoryResponse"] = []
+
+
+class ItemResponse(BaseModel):
     id: int
-    name: str
-
-
-class CategoryTreeResponse(CategoryResponse):
-    children: List["CategoryTreeResponse"] = []
+    price: int
+    discount: Optional[DiscountBase] = None
+    category: CategoryBase
+    stock: int
